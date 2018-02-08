@@ -115,7 +115,7 @@ class SmappeeLocal
 	
 	public function setComfortPlug($plug_id=1, $plug_status=1) 
     {
-		$body = 'control,controlId='.$plug_id.'|'.$plug_status;
+		$body = 'control,controlId='.$plug_status.'|'.$plug_id;
 		$result = $this->_postCall('/gateway/apipublic/commandControlPublic', $body);
 
         $data = json_decode($result->getBody(), true);
