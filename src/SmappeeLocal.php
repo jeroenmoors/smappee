@@ -61,15 +61,12 @@ class SmappeeLocal
             throw new \Exception("You must set the local Smappee device address and the password to access it.");
         }
         
-        $url = "http://{$host}".$uri;
-
 		$result = $client->request('POST', $url, [
             'headers' => [
                 'Content-Type' => 'application/json'
             ],
             'body' => $body
         ]);
-        
         return $result;
 
 	}
@@ -80,7 +77,7 @@ class SmappeeLocal
 	}
     
     public function getInstantaneous()
-    {            
+    {
         $result = $this->_postCall('/gateway/apipublic/instantaneous', 'loadInstantaneous');
         
         $data = json_decode($result->getBody(), true);
@@ -115,10 +112,17 @@ class SmappeeLocal
 	
 	public function setComfortPlug($plug_id=1, $plug_status=1) 
     {
-		$body = 'control,controlId='.$plug_status.'|'.$plug_id;
+		if ($plug_status) {
+			$plug_action = 'ON';
+		} else {
+			$plug_action = 'OFF';
+		}
+		$body = 'control,{"controllableNodeId":"'.$plug_id.'","action":"'.$plug_action.'"}';
 		$result = $this->_postCall('/gateway/apipublic/commandControlPublic', $body);
 
         $data = json_decode($result->getBody(), true);
+        
+        var_dump($data);
         
         $retval = [];
 
