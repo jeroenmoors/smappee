@@ -50,31 +50,35 @@ class SmappeeLocal
              ->setPassword($password);
     }
     
-    private function _postCall($uri, $body)
+    protected function _postCall($uri, $body)
     {
-	    $client = $this->getHttpClient();
-        
+	      $client = $this->getHttpClient();
         $host = $this->getSmappeeHost();
-        $password = $this->getPassword();
         
-        if(empty($host) || empty($password)) {
-            throw new \Exception("You must set the local Smappee device address and the password to access it.");
+        if(empty($host)) {
+            throw new \Exception("You must set the local Smappee device address to access it.");
         }
-        
-		$result = $client->request('POST', $url, [
+        $url = "http://{$host}".$uri;
+
+        $result = $client->request('POST', $url, [
             'headers' => [
                 'Content-Type' => 'application/json'
             ],
             'body' => $body
         ]);
         return $result;
+    }
 
+    public function login() 
+    {
+	$password = $this->getPassword();
+	    
+	if(empty($password)) {
+            throw new \Exception("You must set the Smappee password to login");
 	}
-
-	public function logon() 
-	{
-		$result = $this->_postCall('/gateway/apipublic/logon', $this->_password);
-	}
+	    
+	$result = $this->_postCall('/gateway/apipublic/logon', $password);
+    }
     
     public function getInstantaneous()
     {
@@ -95,7 +99,7 @@ class SmappeeLocal
     
     public function listComfortPlugs() 
     {
-		$result = $this->_postCall('/gateway/apipublic/commandControlPublic', 'load');
+        $result = $this->_postCall('/gateway/apipublic/commandControlPublic', 'load');
 
         $data = json_decode($result->getBody(), true);
         
@@ -108,17 +112,17 @@ class SmappeeLocal
         }
         
         return $retval;
-	}
+    }
 	
-	public function setComfortPlug($plug_id=1, $plug_status=1) 
+    public function setComfortPlug($plug_id, $plug_status) 
     {
-		if ($plug_status) {
-			$plug_action = 'ON';
-		} else {
-			$plug_action = 'OFF';
-		}
-		$body = 'control,{"controllableNodeId":"'.$plug_id.'","action":"'.$plug_action.'"}';
-		$result = $this->_postCall('/gateway/apipublic/commandControlPublic', $body);
+  		  if ($plug_status) {
+			    $plug_action = 'ON';
+		    } else {
+			    $plug_action = 'OFF';
+		    }
+		    $body = 'control,{"controllableNodeId":"'.$plug_id.'","action":"'.$plug_action.'"}';
+		    $result = $this->_postCall('/gateway/apipublic/commandControlPublic', $body);
 
         $data = json_decode($result->getBody(), true);
         
@@ -133,6 +137,6 @@ class SmappeeLocal
         }
         
         return $retval;
-	}
+    }
 }
 
